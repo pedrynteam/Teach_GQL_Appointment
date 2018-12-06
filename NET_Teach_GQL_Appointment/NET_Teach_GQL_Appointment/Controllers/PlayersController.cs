@@ -6,25 +6,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NET_Teach_GQL_Appointment.MVCModel;
+using NET_Teach_GQL_Appointment.Models;
 
-namespace NET_Teach_GQL_Appointment.Models
+namespace NET_Teach_GQL_Appointment.Controllers
 {
-    public class CustomersController : Controller
+    public class PlayersController : Controller
     {
         private readonly MVCDbContext _context;
 
-        public CustomersController(MVCDbContext context)
+        public PlayersController(MVCDbContext context)
         {
             _context = context;
         }
 
-        // GET: Customers
+        // GET: Players
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Customer.ToListAsync());
+            var mVCDbContext = _context.Player.Include(p => p.Team);
+            return View(await mVCDbContext.ToListAsync());
         }
 
-        // GET: Customers/Details/5
+        // GET: Players/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -32,39 +34,42 @@ namespace NET_Teach_GQL_Appointment.Models
                 return NotFound();
             }
 
-            var customer = await _context.Customer
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            var player = await _context.Player
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(m => m.PlayerId == id);
+            if (player == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(player);
         }
 
-        // GET: Customers/Create
+        // GET: Players/Create
         public IActionResult Create()
         {
+            ViewData["TeamId"] = new SelectList(_context.Team, "TeamId", "Name");
             return View();
         }
 
-        // POST: Customers/Create
+        // POST: Players/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CustomerName,Address,Inserted")] Customer customer)
+        public async Task<IActionResult> Create([Bind("PlayerId,Name,TeamId")] Player player)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
+                _context.Add(player);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+            ViewData["TeamId"] = new SelectList(_context.Team, "TeamId", "Name", player.TeamId);
+            return View(player);
         }
 
-        // GET: Customers/Edit/5
+        // GET: Players/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -72,22 +77,23 @@ namespace NET_Teach_GQL_Appointment.Models
                 return NotFound();
             }
 
-            var customer = await _context.Customer.FindAsync(id);
-            if (customer == null)
+            var player = await _context.Player.FindAsync(id);
+            if (player == null)
             {
                 return NotFound();
             }
-            return View(customer);
+            ViewData["TeamId"] = new SelectList(_context.Team, "TeamId", "Name", player.TeamId);
+            return View(player);
         }
 
-        // POST: Customers/Edit/5
+        // POST: Players/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerName,Address,Inserted")] Customer customer)
+        public async Task<IActionResult> Edit(int id, [Bind("PlayerId,Name,TeamId")] Player player)
         {
-            if (id != customer.Id)
+            if (id != player.PlayerId)
             {
                 return NotFound();
             }
@@ -96,12 +102,12 @@ namespace NET_Teach_GQL_Appointment.Models
             {
                 try
                 {
-                    _context.Update(customer);
+                    _context.Update(player);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomerExists(customer.Id))
+                    if (!PlayerExists(player.PlayerId))
                     {
                         return NotFound();
                     }
@@ -112,10 +118,11 @@ namespace NET_Teach_GQL_Appointment.Models
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+            ViewData["TeamId"] = new SelectList(_context.Team, "TeamId", "Name", player.TeamId);
+            return View(player);
         }
 
-        // GET: Customers/Delete/5
+        // GET: Players/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -123,30 +130,31 @@ namespace NET_Teach_GQL_Appointment.Models
                 return NotFound();
             }
 
-            var customer = await _context.Customer
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            var player = await _context.Player
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(m => m.PlayerId == id);
+            if (player == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(player);
         }
 
-        // POST: Customers/Delete/5
+        // POST: Players/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customer = await _context.Customer.FindAsync(id);
-            _context.Customer.Remove(customer);
+            var player = await _context.Player.FindAsync(id);
+            _context.Player.Remove(player);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id)
+        private bool PlayerExists(int id)
         {
-            return _context.Customer.Any(e => e.Id == id);
+            return _context.Player.Any(e => e.PlayerId == id);
         }
     }
 }

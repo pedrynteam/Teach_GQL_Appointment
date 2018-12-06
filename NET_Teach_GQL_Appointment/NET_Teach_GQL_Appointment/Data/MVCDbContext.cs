@@ -25,5 +25,11 @@ namespace NET_Teach_GQL_Appointment.Models
         }
 
         public DbSet<NET_Teach_GQL_Appointment.MVCModel.Customer> Customer { get; set; }
+
+        public DbSet<NET_Teach_GQL_Appointment.MVCModel.Order> Order { get; set; }
+
+        public DbSet<NET_Teach_GQL_Appointment.MVCModel.Team> Team { get; set; }
+
+        public DbSet<NET_Teach_GQL_Appointment.MVCModel.Player> Player { get; set; }
     }
 }
